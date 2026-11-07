@@ -1,0 +1,51 @@
+spec: blueprint/v1
+name: trustpal-impact-agent
+
+agent:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  interfaces:
+    frontend: true
+    messaging: false
+  healthcheck:
+    path: /health
+    interval: 10s
+    timeout: 5s
+    retries: 3
+  inputs:
+    - name: PAYPAL_ENVIRONMENT
+      datatype: string
+      default: sandbox
+      description: PayPal environment; must remain sandbox for the public hackathon demo
+    - name: PAYPAL_CLIENT_ID
+      datatype: string
+      secret: true
+      description: PayPal Sandbox application client ID
+    - name: PAYPAL_CLIENT_SECRET
+      datatype: string
+      secret: true
+      description: PayPal Sandbox application client secret
+    - name: AG_STUDIO_LICENSE_KEY
+      datatype: string
+      secret: true
+      description: AG Studio 45-day browser trial licence
+    - name: STEWARD_ACCESS_TOKEN
+      datatype: string
+      secret: true
+      default: ""
+      description: Optional random token of at least 32 characters for approved steward reviews; empty keeps shared verification locked
+models:
+  impact:
+    provider: gateway
+    models:
+      - gpt-5-6-terra
+
+dev:
+  interfaces:
+    frontend:
+      port: 4175
+  command: node --env-file=.env.local server/app-server.mjs
+  watch:
+    - server
+    - src
